@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
     int songsCount = 1;
     if ( musicFile ) {
-        while ((hFile = readdir( musicFile )) != NULL ) {
+        while (songsCount < 101 && (hFile = readdir( musicFile )) != NULL ) {
        if ( !strcmp( hFile->d_name, "."  )) continue;
        if ( !strcmp( hFile->d_name, ".." )) continue;
 
@@ -38,24 +38,30 @@ int main(int argc, char **argv)
     closedir( musicFile );
     }else{
         printf("didnt find folder\n");
+        
     }
 
     printf("------------------------------------------\n");
 
+    int choice = 0;
 
-    int choice;
+    if(songsCount != 1){
+        do{
+            printf("now choose a song: ");
+            scanf("%d", &choice);
+            while (getchar() != '\n'); // Clear leftover characters from input buffer
+        }while(!(choice >= 1 && choice <= songsCount - 1));
+
+        printf("%s now playing... ", songs[choice - 1]);
+    }else{
+        printf("Music directory is empty");
+        return 1;
+    }
     
-    do{
-        printf("now choose a song: ");
-        scanf("%d", &choice);
-        while (getchar() != '\n'); // Clear leftover characters from input buffer
-    }while(!(choice >= 1 && choice <= songsCount - 1));
+
+
+
     
-
-
-
-
-    printf("%s now playing... ", songs[choice - 1]);
 
 
     // ma_engine engine;
