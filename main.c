@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <dirent.h>
+#include <string.h>
 
 char *lastN(const char *str, size_t n)
 {
@@ -20,23 +21,41 @@ int main(int argc, char **argv)
 
     struct dirent* hFile;
     
+    char songs[100][260];
+
     int songsCount = 1;
     if ( musicFile ) {
         while ((hFile = readdir( musicFile )) != NULL ) {
        if ( !strcmp( hFile->d_name, "."  )) continue;
        if ( !strcmp( hFile->d_name, ".." )) continue;
 
-        if(strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
-            printf( "%d. %s\n",songsCount, hFile->d_name);
+        if(hFile->d_namlen >= 4 && strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
+            strcpy(songs[songsCount-1], hFile->d_name);
+            printf( "%d. %s\n",songsCount, songs[songsCount-1]);
             songsCount++;
         }
         } 
     closedir( musicFile );
     }else{
-        printf("didnt find folder");
+        printf("didnt find folder\n");
     }
 
     printf("------------------------------------------\n");
+
+
+    int choice;
+    
+    do{
+        printf("now choose a song: ");
+        scanf("%d", &choice);
+        while (getchar() != '\n'); // Clear leftover characters from input buffer
+    }while(!(choice >= 1 && choice <= songsCount - 1));
+    
+
+
+
+
+    printf("%s now playing... ", songs[choice - 1]);
 
 
     // ma_engine engine;
