@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <dirent.h>
 
+char *lastN(const char *str, size_t n)
+{
+    size_t len = strlen(str);
+    return (char *)str + len - n;
+}
+
 int main(int argc, char **argv)
 {
     printf("MP3 PLAYER \n");
@@ -20,9 +26,10 @@ int main(int argc, char **argv)
        if ( !strcmp( hFile->d_name, "."  )) continue;
        if ( !strcmp( hFile->d_name, ".." )) continue;
 
-        
+        if(strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
             printf( "%d. %s\n",songsCount, hFile->d_name);
-            
+            songsCount++;
+        }
         } 
     closedir( musicFile );
     }else{
@@ -78,3 +85,5 @@ int main(int argc, char **argv)
     // ma_engine_uninit(&engine);
     return 0;
 }
+
+
