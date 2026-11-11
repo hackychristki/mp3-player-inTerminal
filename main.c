@@ -5,6 +5,12 @@
 #include <dirent.h>
 #include <string.h>
 
+
+
+ma_engine engine;
+ma_sound sound;
+
+
 char *lastN(const char *str, size_t n)
 {
     size_t len = strlen(str);
@@ -59,55 +65,47 @@ int main(int argc, char **argv)
     }
     
 
+    if (ma_engine_init(NULL, &engine) != MA_SUCCESS) {
+        printf("Failed to initialize audio engine.\n");
+        return 1;
+    }
+
+    char path[] = "music/";
+
+    strcat(path, songs[choice - 1]);
 
 
-    
+    if (ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound) != MA_SUCCESS) {
+        printf("Failed to load: %s\n", path);
+        ma_engine_uninit(&engine);
+        return 1;
+    }
 
+    ma_sound_start(&sound);
+    printf("Playing %s\nPress Enter to quit...\n", argv[1]);
+    // getchar();
+    bool playing = true; 
 
-    // ma_engine engine;
-    // ma_sound sound;
-
-    // if (argc < 2) {
-    //     printf("Usage: %s <file.mp3>\n", argv[0]);
-    //     return 1;
-    // }
-
-    // if (ma_engine_init(NULL, &engine) != MA_SUCCESS) {
-    //     printf("Failed to initialize audio engine.\n");
-    //     return 1;
-    // }
-
-    // if (ma_sound_init_from_file(&engine, argv[1], 0, NULL, NULL, &sound) != MA_SUCCESS) {
-    //     printf("Failed to load: %s\n", argv[1]);
-    //     ma_engine_uninit(&engine);
-    //     return 1;
-    // }
-
-    // ma_sound_start(&sound);
-    // printf("Playing %s\nPress Enter to quit...\n", argv[1]);
-    // // getchar();
-    // bool playing = true; 
-
-    // while(true){
-    //     char input;
+    while(true){
+        char input;
         
-    //     scanf("%c", &input);
-    //     printf("gelesen: %d, playing: %d\n", input, playing);
-    //     if(input == 'p' && playing){
-    //         ma_sound_stop(&sound);
-    //         playing = false;
-    //     }
-    //     else if(input == 'p' && !playing){
-    //         ma_sound_start(&sound);
-    //         playing = true;
-    //     }
-    //     else if(input == 'q'){
-    //         break;
-    //     }
-    // }
+        scanf("%c", &input);
+        printf("gelesen: %d, playing: %d\n", input, playing);
+        if(input == 'p' && playing){
+            ma_sound_stop(&sound);
+            playing = false;
+        }
+        else if(input == 'p' && !playing){
+            ma_sound_start(&sound);
+            playing = true;
+        }
+        else if(input == 'q'){
+            break;
+        }
+    }
 
-    // ma_sound_uninit(&sound);
-    // ma_engine_uninit(&engine);
+    ma_sound_uninit(&sound);
+    ma_engine_uninit(&engine);
     return 0;
 }
 
