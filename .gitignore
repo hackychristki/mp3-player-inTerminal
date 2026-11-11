@@ -1,3 +1,9 @@
-main.exe
-
-player.exe
+# Build-Artefakte
+*.exe
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.pdb
+*.ilk

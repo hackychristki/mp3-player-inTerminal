@@ -58,7 +58,7 @@ int main(int argc, char **argv)
             while (getchar() != '\n'); // Clear leftover characters from input buffer
         }while(!(choice >= 1 && choice <= songsCount - 1));
 
-        printf("%s now playing... ", songs[choice - 1]);
+        // printf("%s now playing... \n", songs[choice - 1]);
     }else{
         printf("Music directory is empty");
         return 1;
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     }
 
     ma_sound_start(&sound);
-    printf("Playing %s\nPress Enter to quit...\n", argv[1]);
+    printf("Playing %s\nInput 'p' to pause, 'q' to quit...\n", songs[choice - 1]);
     // getchar();
     bool playing = true; 
 
