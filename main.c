@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <string.h>
+#include <unistd.h>
 
 
 
@@ -17,10 +18,19 @@ char *lastN(const char *str, size_t n)
     return (char *)str + len - n;
 }
 
+void advance_cursor() {
+  static int pos=0;
+  char cursor[4]={'/','-','\\','|'};
+  printf("%c\b", cursor[pos]);
+  fflush(stdout);
+  pos = (pos+1) % 4;
+}
+
 int main(int argc, char **argv)
 {
-    printf("MP3 PLAYER \n");
-    printf("------------------------------------------\n");
+    printf("+----------------------------------------+\n");
+    printf("|------------MP3 PLAYER------------------|\n");
+    printf("|----------------------------------------+\n");
 
 
     DIR* musicFile = opendir( "music" );
@@ -37,7 +47,7 @@ int main(int argc, char **argv)
 
         if(hFile->d_namlen >= 4 && strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
             strcpy(songs[songsCount-1], hFile->d_name);
-            printf( "%d. %s\n",songsCount, songs[songsCount-1]);
+            printf( "| %d. %s \n",songsCount, songs[songsCount-1]);
             songsCount++;
         }
         } 
@@ -47,7 +57,7 @@ int main(int argc, char **argv)
         
     }
 
-    printf("------------------------------------------\n");
+    printf("+----------------------------------------+\n");
 
     int choice = 0;
 
@@ -70,7 +80,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    char path[] = "music/";
+    char path[300] = "music/";
 
     strcat(path, songs[choice - 1]);
 
@@ -82,7 +92,15 @@ int main(int argc, char **argv)
     }
 
     ma_sound_start(&sound);
-    printf("Playing %s\nInput 'p' to pause, 'q' to quit...\n", songs[choice - 1]);
+    printf("Playing %s\nInput 'p' to pause, 'q' to quit... ", songs[choice - 1]);
+
+    int i;
+    for (i=0; i<100; i++) {
+        advance_cursor();
+        usleep(1000000);
+    }
+    printf("\n");
+
     // getchar();
     bool playing = true; 
 
@@ -90,7 +108,6 @@ int main(int argc, char **argv)
         char input;
         
         scanf("%c", &input);
-        printf("gelesen: %d, playing: %d\n", input, playing);
         if(input == 'p' && playing){
             ma_sound_stop(&sound);
             playing = false;
