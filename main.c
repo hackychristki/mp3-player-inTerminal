@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+#include <conio.h>
 
 
 
@@ -94,32 +95,27 @@ int main(int argc, char **argv)
     ma_sound_start(&sound);
     printf("Playing %s\nInput 'p' to pause, 'q' to quit... ", songs[choice - 1]);
 
-    int i;
-    for (i=0; i<100; i++) {
-        advance_cursor();
-        usleep(1000000);
+    bool playing = true;
+
+    while (true) {
+        // non-blocking: only read when a key is actually waiting
+        if (_kbhit()) {
+            int input = _getch();
+
+            if (input == 'p') {
+                if (playing) ma_sound_stop(&sound);
+                else         ma_sound_start(&sound);
+                playing = !playing;
+            }
+            else if (input == 'q') break;
+        }
+
+        if (playing) advance_cursor();
+        if (ma_sound_at_end(&sound)) break;
+
+        usleep(100000);
     }
     printf("\n");
-
-    // getchar();
-    bool playing = true; 
-
-    while(true){
-        char input;
-        
-        scanf("%c", &input);
-        if(input == 'p' && playing){
-            ma_sound_stop(&sound);
-            playing = false;
-        }
-        else if(input == 'p' && !playing){
-            ma_sound_start(&sound);
-            playing = true;
-        }
-        else if(input == 'q'){
-            break;
-        }
-    }
 
     ma_sound_uninit(&sound);
     ma_engine_uninit(&engine);
