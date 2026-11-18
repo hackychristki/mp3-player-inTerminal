@@ -93,6 +93,16 @@ int main(int argc, char **argv)
     }
 
     ma_sound_start(&sound);
+    printf("        .----------------.\n");
+    printf("       /                /|\n");
+    printf("      /________________/ |\n");
+    printf("      |                | |\n");
+    printf("      |                | |\n");
+    printf("      |                | |\n");
+    printf("      |                | |\n");
+    printf("   _..|             _..| |\n");
+    printf("  /   |            /   |/\n");
+    printf("  \\___/            \\___/\n");
     printf("Playing %s\nInput 'p' to pause, 'q' to quit... ", songs[choice - 1]);
 
     bool playing = true;
