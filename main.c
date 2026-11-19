@@ -29,106 +29,131 @@ void advance_cursor() {
 
 int main(int argc, char **argv)
 {
-    printf("+----------------------------------------+\n");
-    printf("|------------MP3 PLAYER------------------|\n");
-    printf("|----------------------------------------+\n");
+    while(true){    
+        printf("+----------------------------------------+\n");
+        printf("|------------MP3 PLAYER------------------|\n");
+        printf("|----------------------------------------+\n");
 
 
-    DIR* musicFile = opendir( "music" );
+        DIR* musicFile = opendir( "music" );
 
-    struct dirent* hFile;
-    
-    char songs[100][260];
-
-    int songsCount = 1;
-    if ( musicFile ) {
-        while (songsCount < 101 && (hFile = readdir( musicFile )) != NULL ) {
-       if ( !strcmp( hFile->d_name, "."  )) continue;
-       if ( !strcmp( hFile->d_name, ".." )) continue;
-
-        if(hFile->d_namlen >= 4 && strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
-            strcpy(songs[songsCount-1], hFile->d_name);
-            printf( "| %d. %s \n",songsCount, songs[songsCount-1]);
-            songsCount++;
-        }
-        } 
-    closedir( musicFile );
-    }else{
-        printf("didnt find folder\n");
+        struct dirent* hFile;
         
-    }
+        char songs[100][260];
 
-    printf("+----------------------------------------+\n");
+        int songsCount = 1;
+        if ( musicFile ) {
+            while (songsCount < 101 && (hFile = readdir( musicFile )) != NULL ) {
+        if ( !strcmp( hFile->d_name, "."  )) continue;
+        if ( !strcmp( hFile->d_name, ".." )) continue;
 
-    int choice = 0;
-
-    if(songsCount != 1){
-        do{
-            printf("now choose a song: ");
-            scanf("%d", &choice);
-            while (getchar() != '\n'); // Clear leftover characters from input buffer
-        }while(!(choice >= 1 && choice <= songsCount - 1));
-
-        // printf("%s now playing... \n", songs[choice - 1]);
-    }else{
-        printf("Music directory is empty");
-        return 1;
-    }
-    
-
-    if (ma_engine_init(NULL, &engine) != MA_SUCCESS) {
-        printf("Failed to initialize audio engine.\n");
-        return 1;
-    }
-
-    char path[300] = "music/";
-
-    strcat(path, songs[choice - 1]);
-
-
-    if (ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound) != MA_SUCCESS) {
-        printf("Failed to load: %s\n", path);
-        ma_engine_uninit(&engine);
-        return 1;
-    }
-
-    ma_sound_start(&sound);
-    printf("        .----------------.\n");
-    printf("       /                /|\n");
-    printf("      /________________/ |\n");
-    printf("      |                | |\n");
-    printf("      |                | |\n");
-    printf("      |                | |\n");
-    printf("      |                | |\n");
-    printf("   _..|             _..| |\n");
-    printf("  /   |            /   |/\n");
-    printf("  \\___/            \\___/\n");
-    printf("Playing %s\nInput 'p' to pause, 'q' to quit... ", songs[choice - 1]);
-
-    bool playing = true;
-
-    while (true) {
-        // non-blocking: only read when a key is actually waiting
-        if (_kbhit()) {
-            int input = _getch();
-
-            if (input == 'p') {
-                if (playing) ma_sound_stop(&sound);
-                else         ma_sound_start(&sound);
-                playing = !playing;
+            if(hFile->d_namlen >= 4 && strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
+                strcpy(songs[songsCount-1], hFile->d_name);
+                printf( "| %d. %s \n",songsCount, songs[songsCount-1]);
+                songsCount++;
             }
-            else if (input == 'q') break;
+            } 
+        closedir( musicFile );
+        }else{
+            printf("didnt find folder\n");
+            
         }
 
-        if (playing) advance_cursor();
-        if (ma_sound_at_end(&sound)) break;
+        printf("+----------------------------------------+\n");
 
-        usleep(100000);
+        int choice = 0;
+        bool quit = false;
+
+        if(songsCount != 1){
+            do{
+                printf("now choose a song: \n");
+                printf("'999' to quit");
+                scanf("%d", &choice);
+                if(choice == 999){
+                    quit = true;
+                    break;
+                }
+                while (getchar() != '\n'); // Clear leftover characters from input buffer
+            }while(!(choice >= 1 && choice <= songsCount - 1));
+
+            // printf("%s now playing... \n", songs[choice - 1]);
+        }else{
+            printf("Music directory is empty");
+            return 1;
+        }
+
+        if(quit == true){
+            return 0;
+        }
+        
+
+        if (ma_engine_init(NULL, &engine) != MA_SUCCESS) {
+            printf("Failed to initialize audio engine.\n");
+            return 1;
+        }
+
+        char path[300] = "music/";
+
+        strcat(path, songs[choice - 1]);
+
+
+        if (ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound) != MA_SUCCESS) {
+            printf("Failed to load: %s\n", path);
+            ma_engine_uninit(&engine);
+            return 1;
+        }
+
+        ma_sound_start(&sound);
+        printf("        .----------------.\n");
+        printf("       /                /|\n");
+        printf("      /________________/ |\n");
+        printf("      |                | |\n");
+        printf("      |                | |\n");
+        printf("      |                | |\n");
+        printf("      |                | |\n");
+        printf("   _..|             _..| |\n");
+        printf("  /   |            /   |/\n");
+        printf("  \\___/            \\___/\n");
+        printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu \n", songs[choice - 1]);
+
+        bool playing = true;
+
+        bool toMenu = false;
+
+        while (true) {
+            // non-blocking: only read when a key is actually waiting
+            if (_kbhit()) {
+                int input = _getch();
+
+                if (input == 'p') {
+                    if (playing) ma_sound_stop(&sound);
+                    else         ma_sound_start(&sound);
+                    playing = !playing;
+                }
+                else if (input == 'q'){
+                    toMenu = true;
+                    break;
+                } 
+            }
+
+            if (playing) advance_cursor();
+            if (ma_sound_at_end(&sound)) break;
+
+            usleep(100000);
+        }
+
+        
+
+        printf("\n");
+
+        ma_sound_uninit(&sound);
+        ma_engine_uninit(&engine);
+
+        if(toMenu){
+            toMenu = false;
+            continue;
+        }
     }
-    printf("\n");
-
-    ma_sound_uninit(&sound);
-    ma_engine_uninit(&engine);
     return 0;
 }
 
