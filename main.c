@@ -92,61 +92,81 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        char path[300] = "music/";
-
-        strcat(path, songs[choice - 1]);
-
-
-        if (ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound) != MA_SUCCESS) {
-            printf("Failed to load: %s\n", path);
-            ma_engine_uninit(&engine);
-            return 1;
-        }
-
-        ma_sound_start(&sound);
-        printf("        .----------------.\n");
-        printf("       /                /|\n");
-        printf("      /________________/ |\n");
-        printf("      |                | |\n");
-        printf("      |                | |\n");
-        printf("      |                | |\n");
-        printf("      |                | |\n");
-        printf("   _..|             _..| |\n");
-        printf("  /   |            /   |/\n");
-        printf("  \\___/            \\___/\n");
-        printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu \n", songs[choice - 1]);
 
         bool playing = true;
 
         bool toMenu = false;
 
-        while (true) {
-            // non-blocking: only read when a key is actually waiting
-            if (_kbhit()) {
-                int input = _getch();
+        bool playNext = false;
 
-                if (input == 'p') {
-                    if (playing) ma_sound_stop(&sound);
-                    else         ma_sound_start(&sound);
-                    playing = !playing;
-                }
-                else if (input == 'q'){
-                    toMenu = true;
-                    break;
-                } 
+        while(true){
+            char path[300] = "music/";
+
+            strcat(path, songs[choice - 1]);
+
+
+            if (ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound) != MA_SUCCESS) {
+                printf("Failed to load: %s\n", path);
+                ma_engine_uninit(&engine);
+                return 1;
             }
 
-            if (playing) advance_cursor();
-            if (ma_sound_at_end(&sound)) break;
+            ma_sound_start(&sound);
+            printf("        .----------------.\n");
+            printf("       /                /|\n");
+            printf("      /________________/ |\n");
+            printf("      |                | |\n");
+            printf("      |                | |\n");
+            printf("      |                | |\n");
+            printf("      |                | |\n");
+            printf("   _..|             _..| |\n");
+            printf("  /   |            /   |/\n");
+            printf("  \\___/            \\___/\n");
+            printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu \n", songs[choice - 1]);
 
-            usleep(100000);
+
+            while (true) {
+                // non-blocking: only read when a key is actually waiting
+                if (_kbhit()) {
+                    int input = _getch();
+
+                    if (input == 'p') {
+                        if (playing) ma_sound_stop(&sound);
+                        else         ma_sound_start(&sound);
+                        playing = !playing;
+                    }
+                    else if (input == 'q'){
+                        toMenu = true;
+                        break;
+                    } else if (input == 'n'){
+                        playNext = true;
+                        break;
+                    }
+                }
+
+                if (playing) advance_cursor();
+                if (ma_sound_at_end(&sound)) break;
+
+                usleep(100000);
+            }
+
+            
+
+            printf("\n");
+
+            ma_sound_uninit(&sound);
+            
+
+            if(playNext){
+                playNext = false;
+                choice++;
+                continue;
+            }else{
+                break;
+            }
+
         }
 
-        
-
-        printf("\n");
-
-        ma_sound_uninit(&sound);
         ma_engine_uninit(&engine);
 
         if(toMenu){
