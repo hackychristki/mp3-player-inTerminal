@@ -122,7 +122,7 @@ int main(int argc, char **argv)
             printf("   _..|             _..| |\n");
             printf("  /   |            /   |/\n");
             printf("  \\___/            \\___/\n");
-            printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu \n", songs[choice - 1]);
+            printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu, 'n' to play next \n", songs[choice - 1]);
 
 
             while (true) {
@@ -160,6 +160,11 @@ int main(int argc, char **argv)
             if(playNext){
                 playNext = false;
                 choice++;
+                printf("%d", songsCount -1);
+                if(choice >= songsCount){
+                    printf("starting from beginning...\n");
+                    choice = 1;
+                }
                 continue;
             }else{
                 break;
