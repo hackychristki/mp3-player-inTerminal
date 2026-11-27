@@ -6,7 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <conio.h>
-
+#include <stdlib.h>
+#include <windows.h>
 
 
 ma_engine engine;
@@ -19,20 +20,46 @@ char *lastN(const char *str, size_t n)
     return (char *)str + len - n;
 }
 
-void advance_cursor() {
-  static int pos=0;
-  char cursor[4]={'/','-','\\','|'};
-  printf("%c\b", cursor[pos]);
-  fflush(stdout);
-  pos = (pos+1) % 4;
+static bool use_color;
+
+static void style(const char *code)
+{
+    if (use_color) fputs(code, stdout);
+}
+
+static void draw_header(const char *screen)
+{
+    style("\x1b[1;96m");
+    puts("  ================================================");
+    puts("    MP3 PLAYER                         |:|::|:|");
+    puts("  ================================================");
+    style("\x1b[0m");
+    printf("\n    %s\n\n", screen);
+}
+
+static void draw_playback_status(bool playing)
+{
+    static unsigned int frame;
+    static const char *const meters[] = {"|.::|", "|:.:|", "|::.|", "|:.:|"};
+
+    printf("\r    ");
+    style(playing ? "\x1b[1;96m" : "\x1b[1;93m");
+    printf("%s  %-7s", playing ? meters[frame++ % 4] : "|   |",
+           playing ? "PLAYING" : "PAUSED");
+    style("\x1b[0m");
+    fflush(stdout);
 }
 
 int main(int argc, char **argv)
 {
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD console_mode;
+    use_color = GetConsoleMode(console, &console_mode) &&
+                SetConsoleMode(console, console_mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
     while(true){    
-        printf("+----------------------------------------+\n");
-        printf("|------------MP3 PLAYER------------------|\n");
-        printf("|----------------------------------------+\n");
+        system("cls"); // Clear the screen
+        draw_header("LIBRARY");
 
 
         DIR* musicFile = opendir( "music" );
@@ -49,25 +76,29 @@ int main(int argc, char **argv)
 
             if(hFile->d_namlen >= 4 && strcmp(lastN(hFile->d_name, 4), ".mp3") == 0){
                 strcpy(songs[songsCount-1], hFile->d_name);
-                printf( "| %d. %s \n",songsCount, songs[songsCount-1]);
+                style("\x1b[96m");
+                printf("    %3d  ", songsCount);
+                style("\x1b[0m");
+                puts(songs[songsCount-1]);
                 songsCount++;
             }
             } 
         closedir( musicFile );
         }else{
-            printf("didnt find folder\n");
+            puts("    Could not open the music folder.");
             
         }
 
-        printf("+----------------------------------------+\n");
+        puts("\n  ------------------------------------------------");
 
         int choice = 0;
         bool quit = false;
 
         if(songsCount != 1){
+            puts("    [999] Quit\n");
             do{
-                printf("now choose a song: \n");
-                printf("'999' to quit");
+                printf("    Track number > ");
+                fflush(stdout);
                 scanf("%d", &choice);
                 if(choice == 999){
                     quit = true;
@@ -78,7 +109,7 @@ int main(int argc, char **argv)
 
             // printf("%s now playing... \n", songs[choice - 1]);
         }else{
-            printf("Music directory is empty");
+            puts("    No MP3 tracks available.");
             return 1;
         }
 
@@ -93,13 +124,15 @@ int main(int argc, char **argv)
         }
 
 
-        bool playing = true;
+
 
         bool toMenu = false;
 
         bool playNext = false;
 
         while(true){
+
+            system("cls"); // Clear the screen
             char path[300] = "music/";
 
             strcat(path, songs[choice - 1]);
@@ -111,18 +144,16 @@ int main(int argc, char **argv)
                 return 1;
             }
 
+            bool playing = true;
+
             ma_sound_start(&sound);
-            printf("        .----------------.\n");
-            printf("       /                /|\n");
-            printf("      /________________/ |\n");
-            printf("      |                | |\n");
-            printf("      |                | |\n");
-            printf("      |                | |\n");
-            printf("      |                | |\n");
-            printf("   _..|             _..| |\n");
-            printf("  /   |            /   |/\n");
-            printf("  \\___/            \\___/\n");
-            printf("Playing %s\nInput 'p' to pause, 'q' to go back to menu, 'n' to play next \n", songs[choice - 1]);
+            draw_header("NOW PLAYING");
+            style("\x1b[1m");
+            printf("    %s\n", songs[choice - 1]);
+            style("\x1b[0m");
+            printf("    Track %d of %d\n\n", choice, songsCount - 1);
+            puts("  ------------------------------------------------");
+            puts("    [p] Pause/Resume   [n] Next   [q] Library\n");
 
 
             while (true) {
@@ -134,6 +165,7 @@ int main(int argc, char **argv)
                         if (playing) ma_sound_stop(&sound);
                         else         ma_sound_start(&sound);
                         playing = !playing;
+                        if (!playing) draw_playback_status(false);
                     }
                     else if (input == 'q'){
                         toMenu = true;
@@ -144,7 +176,7 @@ int main(int argc, char **argv)
                     }
                 }
 
-                if (playing) advance_cursor();
+                if (playing) draw_playback_status(true);
                 if (ma_sound_at_end(&sound)) break;
 
                 usleep(100000);
@@ -160,9 +192,7 @@ int main(int argc, char **argv)
             if(playNext){
                 playNext = false;
                 choice++;
-                printf("%d", songsCount -1);
                 if(choice >= songsCount){
-                    printf("starting from beginning...\n");
                     choice = 1;
                 }
                 continue;
