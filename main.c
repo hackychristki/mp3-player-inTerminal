@@ -154,7 +154,7 @@ int main(int argc, char **argv)
             style("\x1b[0m");
             printf("    Track %d of %d\n\n", choice, songsCount - 1);
             puts("  --------------------------------------------------------------");
-            puts("    [p] Pause/Resume   [n] Next   [l] Previous   [q] Library\n");
+            puts("    [space] Pause/Resume   [n] Next   [p] Previous   [q] Library\n");
 
 
             while (true) {
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
                 if (_kbhit()) {
                     int input = _getch();
 
-                    if (input == 'p') {
+                    if (input == ' ') {
                         if (playing) ma_sound_stop(&sound);
                         else         ma_sound_start(&sound);
                         playing = !playing;
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
                     } else if (input == 'n'){
                         playNext = true;
                         break;
-                    } else if (input == 'l'){
+                    } else if (input == 'p'){
                         playLast = true;
                         break;
                     }
