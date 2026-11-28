@@ -30,9 +30,9 @@ static void style(const char *code)
 static void draw_header(const char *screen)
 {
     style("\x1b[1;96m");
-    puts("  ================================================");
-    puts("    MP3 PLAYER                         |:|::|:|");
-    puts("  ================================================");
+    puts("  ============================================================");
+    puts("    MP3 PLAYER                                        |:|::|:|");
+    puts("  ============================================================");
     style("\x1b[0m");
     printf("\n    %s\n\n", screen);
 }
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
             
         }
 
-        puts("\n  ------------------------------------------------");
+        puts("  ------------------------------------------------------------");
 
         int choice = 0;
         bool quit = false;
@@ -129,6 +129,7 @@ int main(int argc, char **argv)
         bool toMenu = false;
 
         bool playNext = false;
+        bool playLast = false;
 
         while(true){
 
@@ -152,8 +153,8 @@ int main(int argc, char **argv)
             printf("    %s\n", songs[choice - 1]);
             style("\x1b[0m");
             printf("    Track %d of %d\n\n", choice, songsCount - 1);
-            puts("  ------------------------------------------------");
-            puts("    [p] Pause/Resume   [n] Next   [q] Library\n");
+            puts("  --------------------------------------------------------------");
+            puts("    [p] Pause/Resume   [n] Next   [l] Previous   [q] Library\n");
 
 
             while (true) {
@@ -172,6 +173,9 @@ int main(int argc, char **argv)
                         break;
                     } else if (input == 'n'){
                         playNext = true;
+                        break;
+                    } else if (input == 'l'){
+                        playLast = true;
                         break;
                     }
                 }
@@ -195,6 +199,11 @@ int main(int argc, char **argv)
                 if(choice >= songsCount){
                     choice = 1;
                 }
+                continue;
+            }else if(playLast){
+                playLast = false;
+                choice--;
+                if(choice <= 0) choice = songsCount - 1;
                 continue;
             }else{
                 break;
